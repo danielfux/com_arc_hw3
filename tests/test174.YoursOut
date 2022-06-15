@@ -1,0 +1,4 @@
+Reading the opcodes latency info from tests/test174.dat ... Got latency for 9 opcodes
+Reading the program file tests/test174.in ... Found 200 instructions
+getProgDepth()==292
+getInstDeps(21)=={20,-1}

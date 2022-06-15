@@ -1,0 +1,7 @@
+Reading the opcodes latency info from tests/test170.dat ... Got latency for 9 opcodes
+Reading the program file tests/test170.in ... Found 200 instructions
+getProgDepth()==224
+getInstDeps(180)=={154,162}
+getDepDepth(120)==95
+getInstDeps(46)=={41,43}
+getDepDepth(143)==123

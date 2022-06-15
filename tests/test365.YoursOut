@@ -1,0 +1,29 @@
+Reading the opcodes latency info from tests/test365.dat ... Got latency for 9 opcodes
+Reading the program file tests/test365.in ... Found 200 instructions
+getProgDepth()==297
+getDepDepth(102)==89
+getDepDepth(10)==3
+getDepDepth(150)==171
+getInstDeps(23)=={-1,15}
+getDepDepth(38)==38
+getInstDeps(32)=={26,30}
+getDepDepth(114)==107
+getInstDeps(87)=={49,-1}
+getInstDeps(16)=={-1,-1}
+getDepDepth(17)==0
+getInstDeps(129)=={100,123}
+getInstDeps(97)=={59,71}
+getInstDeps(34)=={9,25}
+getDepDepth(47)==18
+getInstDeps(33)=={24,31}
+getInstDeps(90)=={89,75}
+getDepDepth(117)==116
+getInstDeps(57)=={49,48}
+getInstDeps(113)=={98,88}
+getDepDepth(115)==113
+getDepDepth(146)==197
+getInstDeps(160)=={153,123}
+getInstDeps(92)=={73,34}
+getDepDepth(116)==123
+getInstDeps(188)=={184,180}
+getInstDeps(125)=={102,115}
