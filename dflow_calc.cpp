@@ -2,7 +2,6 @@
 /* Implementation for the dataflow statistics calculator */
 
 #include "dflow_calc.h"
-#include "limits.h"
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -36,35 +35,30 @@ public:
             adjList[edge.src_node_].push_back(make_pair(edge.dst_node_, edge.weight_));
     }
 
-    static void setEdge(vector<Edge> &edges, Edge edge, int src_node_idx, int dst_node_idx, int weight) {
+    static void setEdge(vector<Edge> &edges, int src_node_idx, int dst_node_idx, int weight) {
+        Edge edge;
         edge.src_node_ = src_node_idx;
         edge.dst_node_ = dst_node_idx;
         edge.weight_ = weight;
         edges.push_back(edge);
-        unsigned int tmp_max_weight = instCyc[src_node_idx] + max_depth[dst_node_idx];
+        unsigned int temp;
+        if(dst_node_idx<=-1)
+            temp = 0;
+        else
+            temp = max_depth[dst_node_idx];
+        unsigned int tmp_max_weight = instCyc[src_node_idx] + temp;
         if (tmp_max_weight > max_depth[src_node_idx]) {
             max_depth[src_node_idx] = tmp_max_weight;
         }
     }
-
-    int getWeight(vector<Edge> const &edges, int v, int u) const {
-        for (unsigned i = 0; i < numOfInsts; ++i) {
-            if (edges[i].src_node_ == v && edges[i].dst_node_ == u)
-                return edges[i].weight_;
-        }
-        return -1;
-    }
-
-
 };
 
 ProgCtx analyzeProg(const unsigned int opsLatency[], const InstInfo progTrace[], unsigned int numOfInsts) {
-    if (numOfInsts == 0){
+   /* if (numOfInsts == 0){
         return PROG_CTX_NULL;
     }
-    try{
+    try{ */
         vector<Edge> edges;
-        Edge edge;
         instCyc = new unsigned int[numOfInsts] ;
         max_depth = new unsigned int[numOfInsts];
         instCyc[numOfInsts] = {0};
@@ -72,50 +66,57 @@ ProgCtx analyzeProg(const unsigned int opsLatency[], const InstInfo progTrace[],
 
 
         for (unsigned lineNum = 0 ; lineNum < numOfInsts ; lineNum++){
-           // cout << "lineNum="<< lineNum << endl;
+            //cout << "lineNum="<< lineNum << endl;
             bool flag_s1 = false;
             bool flag_s2 = false;
             instCyc[lineNum] = opsLatency[progTrace[lineNum].opcode];
             if(lineNum == 0){
-                Graph::setEdge(edges, edge, lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
+                Graph::setEdge(edges, lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
+                Graph::setEdge(edges, lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
             }
             else{
                 for(unsigned  j = lineNum - 1 ; j >= 0 ; --j) {
-                 //   cout << "j=" << j << endl;
+                  // cout << "j=" << j << endl;
                     // build edge from the src1 to its dependency
                     if (progTrace[j].dstIdx == progTrace[lineNum].src1Idx && !flag_s1) {
                         flag_s1 = true;
-                        Graph::setEdge(edges, edge, lineNum, j, instCyc[j]);
+                        Graph::setEdge(edges, lineNum, j, instCyc[j]);
                         break;
                     }
                     if(j == 0) break;
                 }
                 if(!flag_s1){
-                    Graph::setEdge(edges, edge, lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
+                    Graph::setEdge(edges, lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
                 }
 
                     for(unsigned  j = lineNum - 1 ; j >= 0 ; --j) {
                         // build edge from the src2 to its dependency
                         if (progTrace[j].dstIdx == progTrace[lineNum].src2Idx && !flag_s2) {
                             flag_s2 = true;
-                            Graph::setEdge(edges, edge, lineNum, j, instCyc[j]);
+                            Graph::setEdge(edges, lineNum, j, instCyc[j]);
                             break;
                         }
                         if(j == 0) break;
                     }
 
                 if(!flag_s2){
-                    Graph::setEdge(edges, edge, lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
+                    Graph::setEdge(edges,lineNum,entry, opsLatency[progTrace[lineNum].opcode]);
                 }
             }
-
+           // cout << "max_dep:" << max_depth[lineNum] << "lineNum:"<<lineNum << endl;
         }
+
         Graph *graph = new Graph(edges,numOfInsts);
+        if(graph == NULL) return PROG_CTX_NULL;
         return graph;
-    }
-    catch (...){
+   // }
+  /*  catch (...){
+        delete[] max_depth;
+        delete[] instCyc;
         return PROG_CTX_NULL;
     }
+    */
+
 
 }
 
@@ -163,7 +164,13 @@ int getInstDeps(ProgCtx ctx, unsigned int theInst, int *src1DepInst, int *src2De
 */
 int getProgDepth(ProgCtx ctx) {
     Graph *dataflow = (Graph*)ctx;
-    return max_depth[dataflow->numOfInsts - 1]; // in cycles
+    int max = 0;
+    for(unsigned int line = 0 ; line < dataflow -> numOfInsts ; ++line){
+        if(max < (int)max_depth[line]){
+            max = (int)max_depth[line];
+        }
+    }
+    return max;// in cycles
 }
 
 
